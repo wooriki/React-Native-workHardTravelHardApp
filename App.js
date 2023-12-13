@@ -13,8 +13,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 
-const STORAGE_KEY = "@toDos";
-
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
@@ -28,29 +26,29 @@ export default function App() {
     loadToDo();
   }, []);
 
+  const STORAGE_KEY = working ? "@toDosWork" : "@toDosTravel";
+
   const savesToDos = async (toSave) => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   };
+
   const loadToDo = async () => {
     const s = await AsyncStorage.getItem(STORAGE_KEY);
     setToDos(JSON.parse(s) || {});
   };
 
-  const addToDo = async () => {
+  const addToDo = () => {
     if (text === "") {
       return;
     }
-    // const newToDos = Object.assign({}, toDos, {
-    //   [Date.now()]: { text, work: working },
-    // });
-    const newToDos = { ...toDos, [Date.now()]: { text, working } };
 
+    const newToDos = { ...toDos, [Date.now()]: { text, working } };
     setToDos(newToDos);
     setText("");
-    await savesToDos(newToDos);
+    savesToDos(newToDos);
   };
 
-  const deletToDo = async (key) => {
+  const deleteToDo = (key) => {
     Alert.alert("Delete to do", "Are you sure?", [
       { text: "Cancel" },
       {
@@ -64,8 +62,8 @@ export default function App() {
         },
       },
     ]);
-    return;
   };
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -102,7 +100,7 @@ export default function App() {
           return toDos[key].working === working ? (
             <View style={styles.toDo} key={key}>
               <Text style={styles.toDoText}>{toDos[key].text}</Text>
-              <TouchableOpacity onPress={() => deletToDo(key)}>
+              <TouchableOpacity onPress={() => deleteToDo(key)}>
                 <Ionicons
                   name="ios-trash-bin-outline"
                   size={18}
@@ -153,6 +151,4 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   toDoText: { color: "white" },
-  fontSize: 16,
-  fontWeight: "500",
 });
